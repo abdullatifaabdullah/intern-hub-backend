@@ -1,0 +1,364 @@
+### InternHub API Test File
+### Use this with REST Client extension in VS Code or IntelliJ
+### Updated to match latest codebase
+
+### Variables
+@baseUrl = http://localhost:8000
+@token = YOUR_ACCESS_TOKEN_HERE
+@adminToken = YOUR_ADMIN_ACCESS_TOKEN_HERE
+@studentToken = YOUR_STUDENT_ACCESS_TOKEN_HERE
+
+####################################################
+### HEALTH CHECK
+####################################################
+
+GET {{baseUrl}}/healthz
+
+####################################################
+### AUTH ENDPOINTS
+####################################################
+
+### Admin Sign In
+POST {{baseUrl}}/api/v2/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "admin@internhub.dev",
+  "password": "ChangeMe123!"
+}
+
+### Copy the access_token from above and update @adminToken variable
+
+### Student Sign In (after creating student)
+POST {{baseUrl}}/api/v2/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "student@internhub.dev",
+  "password": "Student123!"
+}
+
+### Get Current User (Auth)
+GET {{baseUrl}}/api/v2/auth/me
+Authorization: Bearer {{adminToken}}
+
+### Refresh Token (if not stateless strict)
+POST {{baseUrl}}/api/v2/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "YOUR_REFRESH_TOKEN"
+}
+
+### Sign Out
+POST {{baseUrl}}/api/v2/auth/sign-out
+Content-Type: application/json
+
+{
+  "refresh_token": "YOUR_REFRESH_TOKEN"
+}
+
+####################################################
+### USERS ENDPOINTS
+####################################################
+
+### Get Current User (Users)
+GET {{baseUrl}}/api/v2/users/me
+Authorization: Bearer {{adminToken}}
+
+####################################################
+### INTERNSHIPS ENDPOINTS (PUBLIC)
+####################################################
+
+### List All Internships (default pagination)
+GET {{baseUrl}}/api/v2/internships/
+
+### List All Internships (with pagination)
+GET {{baseUrl}}/api/v2/internships/?page=1&limit=10
+
+### List All Internships (with creator details)
+GET {{baseUrl}}/api/v2/internships/?include=creator
+
+### List All Internships (with sorting - newest first)
+GET {{baseUrl}}/api/v2/internships/?sort=-created_at
+
+### List All Internships (with sorting - oldest first)
+GET {{baseUrl}}/api/v2/internships/?sort=created_at
+
+### List All Internships (with sorting by title)
+GET {{baseUrl}}/api/v2/internships/?sort=title
+
+### List All Internships (combined: pagination, include, sort)
+GET {{baseUrl}}/api/v2/internships/?page=1&limit=10&include=creator&sort=-created_at
+
+### Get Specific Internship
+GET {{baseUrl}}/api/v2/internships/1
+
+### Get Internship with Creator
+GET {{baseUrl}}/api/v2/internships/1?include=creator
+
+####################################################
+### INTERNSHIPS ENDPOINTS (ADMIN ONLY)
+####################################################
+
+### Create Internship (Admin)
+POST {{baseUrl}}/api/v2/internships/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Software Engineering Intern",
+  "description": "Join our team for an exciting internship in software development",
+  "company": "Tech Corp",
+  "location": "Remote",
+  "application_deadline": "2025-12-31T23:59:59Z"
+}
+
+### Update Internship (Admin) - Partial Update
+PATCH {{baseUrl}}/api/v2/internships/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Senior Software Engineering Intern",
+  "location": "Hybrid"
+}
+
+### Update Internship (Admin) - Full Update
+PATCH {{baseUrl}}/api/v2/internships/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Senior Software Engineering Intern",
+  "description": "Updated description for senior position",
+  "company": "Tech Corp",
+  "location": "Hybrid",
+  "application_deadline": "2025-12-31T23:59:59Z"
+}
+
+### Delete Internship (Admin)
+DELETE {{baseUrl}}/api/v2/internships/1
+Authorization: Bearer {{adminToken}}
+
+####################################################
+### APPLICATIONS ENDPOINTS (STUDENT ONLY)
+####################################################
+
+### Apply to Internship (Student) - with cover letter
+POST {{baseUrl}}/api/v2/internships/1/applications
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "cover_letter": "I am very interested in this position and would love to contribute to your team."
+}
+
+### Apply to Internship (Student) - without cover letter
+POST {{baseUrl}}/api/v2/internships/2/applications
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{}
+
+### List My Applications (Student) - default
+GET {{baseUrl}}/api/v2/applications/me
+Authorization: Bearer {{studentToken}}
+
+### List My Applications (Student) - with pagination
+GET {{baseUrl}}/api/v2/applications/me?page=1&limit=10
+Authorization: Bearer {{studentToken}}
+
+### List My Applications (Student) - with internship details
+GET {{baseUrl}}/api/v2/applications/me?include=internship
+Authorization: Bearer {{studentToken}}
+
+### List My Applications (Student) - with sorting
+GET {{baseUrl}}/api/v2/applications/me?sort=-created_at
+Authorization: Bearer {{studentToken}}
+
+### List My Applications (Student) - combined
+GET {{baseUrl}}/api/v2/applications/me?page=1&limit=10&include=internship&sort=-created_at
+Authorization: Bearer {{studentToken}}
+
+####################################################
+### APPLICATIONS ENDPOINTS (ADMIN ONLY)
+####################################################
+
+### List Applications for Internship (Admin) - default
+GET {{baseUrl}}/api/v2/internships/1/applications
+Authorization: Bearer {{adminToken}}
+
+### List Applications for Internship (Admin) - with pagination
+GET {{baseUrl}}/api/v2/internships/1/applications?page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### List Applications for Internship (Admin) - with user details
+GET {{baseUrl}}/api/v2/internships/1/applications?include=user
+Authorization: Bearer {{adminToken}}
+
+### List Applications for Internship (Admin) - with sorting
+GET {{baseUrl}}/api/v2/internships/1/applications?sort=-created_at
+Authorization: Bearer {{adminToken}}
+
+### List Applications for Internship (Admin) - combined
+GET {{baseUrl}}/api/v2/internships/1/applications?page=1&limit=10&include=user&sort=-created_at
+Authorization: Bearer {{adminToken}}
+
+### Approve Application (Admin)
+PATCH {{baseUrl}}/api/v2/applications/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### Reject Application (Admin)
+PATCH {{baseUrl}}/api/v2/applications/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "rejected"
+}
+
+####################################################
+### TESTING FLOW
+####################################################
+
+### 1. Health Check
+GET {{baseUrl}}/healthz
+
+### 2. Admin Sign In
+POST {{baseUrl}}/api/v2/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "admin@internhub.dev",
+  "password": "ChangeMe123!"
+}
+
+### Copy access_token from response and update @adminToken above
+
+### 3. Get Current User Info (Admin)
+GET {{baseUrl}}/api/v2/users/me
+Authorization: Bearer {{adminToken}}
+
+### 4. Create First Internship (as Admin)
+POST {{baseUrl}}/api/v2/internships/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Data Science Intern",
+  "description": "Work with our data team on exciting ML projects",
+  "company": "DataCorp",
+  "location": "New York",
+  "application_deadline": "2025-11-30T23:59:59Z"
+}
+
+### 5. Create Second Internship (as Admin)
+POST {{baseUrl}}/api/v2/internships/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Frontend Developer Intern",
+  "description": "Build beautiful user interfaces with React and TypeScript",
+  "company": "WebDev Inc",
+  "location": "San Francisco",
+  "application_deadline": "2025-12-15T23:59:59Z"
+}
+
+### 6. List All Internships (Public)
+GET {{baseUrl}}/api/v2/internships/
+
+### 7. List Internships with Creator (Public)
+GET {{baseUrl}}/api/v2/internships/?include=creator
+
+### 8. Get Specific Internship (Public)
+GET {{baseUrl}}/api/v2/internships/1
+
+### 9. Sign In as Student
+POST {{baseUrl}}/api/v2/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "student@internhub.dev",
+  "password": "Student123!"
+}
+
+### Copy access_token from response and update @studentToken above
+
+### 10. Get Current User Info (Student)
+GET {{baseUrl}}/api/v2/users/me
+Authorization: Bearer {{studentToken}}
+
+### 11. Apply to First Internship (as Student) - with cover letter
+POST {{baseUrl}}/api/v2/internships/1/applications
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "cover_letter": "I have experience in Python and machine learning, and I'm very interested in this position."
+}
+
+### 12. Apply to Second Internship (as Student) - without cover letter
+POST {{baseUrl}}/api/v2/internships/2/applications
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{}
+
+### 13. Check My Applications (Student)
+GET {{baseUrl}}/api/v2/applications/me
+Authorization: Bearer {{studentToken}}
+
+### 14. Check My Applications with Internship Details (Student)
+GET {{baseUrl}}/api/v2/applications/me?include=internship
+Authorization: Bearer {{studentToken}}
+
+### 15. Admin Views Applications for First Internship
+GET {{baseUrl}}/api/v2/internships/1/applications
+Authorization: Bearer {{adminToken}}
+
+### 16. Admin Views Applications with User Details
+GET {{baseUrl}}/api/v2/internships/1/applications?include=user
+Authorization: Bearer {{adminToken}}
+
+### 17. Admin Approves First Application
+PATCH {{baseUrl}}/api/v2/applications/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### 18. Student Checks Updated Application Status
+GET {{baseUrl}}/api/v2/applications/me
+Authorization: Bearer {{studentToken}}
+
+### 19. Admin Rejects Second Application (Optional)
+PATCH {{baseUrl}}/api/v2/applications/2
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "rejected"
+}
+
+### 20. Admin Updates Internship Details
+PATCH {{baseUrl}}/api/v2/internships/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Senior Data Science Intern",
+  "location": "Remote"
+}
+
+### 21. Verify Updated Internship (Public)
+GET {{baseUrl}}/api/v2/internships/1
+
