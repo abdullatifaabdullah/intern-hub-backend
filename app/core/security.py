@@ -6,7 +6,6 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,8 +14,31 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
 
+# Use bcrypt directly to avoid passlib's bug detection issue
+# Passlib's CryptContext has a bug during initialization that causes errors
+import bcrypt
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class BcryptContext:
+    """Simple bcrypt wrapper to replace passlib CryptContext"""
+    def hash(self, password: str) -> str:
+        # Bcrypt has a 72-byte limit, truncate if necessary
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    
+    def verify(self, password: str, hashed: str) -> bool:
+        # Bcrypt has a 72-byte limit, truncate if necessary
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
+        try:
+            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        except Exception:
+            return False
+
+pwd_context = BcryptContext()
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v2/auth/sign-in")
 
 

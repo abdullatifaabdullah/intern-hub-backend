@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+psycopg://hub:hubpass@localhost:5433/hubdb_v2"
 
     # Auth
-    JWT_SECRET: str = "change-this-in-production"
+    JWT_SECRET: str = "0d6a0dfea8d224a3108b50fdd783f869f2d28cbe5841b11697266db0f5fe0aae"
     ACCESS_TOKEN_EXPIRES_MIN: int = 30
     REFRESH_TOKEN_EXPIRES_MIN: int = 43200  # 30 days
 
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     STATELESS_STRICT: bool = True
     ALLOW_REFRESH_TOKEN_STORE: bool = False
 
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: List[str] = ["https://internhub.sadn.site"]
 
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod

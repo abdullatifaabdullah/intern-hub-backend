@@ -57,9 +57,13 @@ async def check_db_initialized() -> None:
         # Fallback: check presence of core tables
         engine = create_async_engine(settings.DATABASE_URL, future=True)
         async with engine.connect() as conn:
-            insp = await conn.run_sync(lambda c: inspect(c))
-            tables = {"users", "internships", "applications"}
-            present = tables.issubset(set(insp.get_table_names()))
+            def _check_tables(sync_conn):
+                inspector = inspect(sync_conn)
+                table_names = inspector.get_table_names()
+                required_tables = {"users", "internships", "applications"}
+                return required_tables.issubset(set(table_names))
+            
+            present = await conn.run_sync(_check_tables)
             initialized = present
         await engine.dispose()
 

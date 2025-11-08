@@ -22,5 +22,5 @@ call .venv\Scripts\activate
 echo Starting server on http://localhost:8000
 echo Press CTRL+C to stop
 echo.
-python -c "import asyncio, uvicorn; asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()); uvicorn.run('app.main:app', host='0.0.0.0', port=8000)"
+python -c "import asyncio, uvicorn; asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy()); uvicorn.run('app.main:app', host='0.0.0.0', port=8000, proxy_headers=True, forwarded_allow_ips='*')"
 
